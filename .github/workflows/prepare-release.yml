@@ -1,0 +1,22 @@
+name: Prepare Release
+
+on:
+  push:
+   branches:
+     - 'release/*'
+
+jobs:
+  prepare:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Checkout tkww actions
+        uses: actions/checkout@v2
+        with:
+          repository: tkww/actions
+          ref: main
+          token: ${{ secrets.TKWW_GITHUB_TOKEN }}
+          path: .github/tkww-actions
+      - uses: ./.github/tkww-actions/packages/prepare-ios-framework-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,26 @@
+name: Create Release
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  release:
+    if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/') == true
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Checkout tkww actions
+      uses: actions/checkout@v2
+      with:
+        repository: tkww/actions
+        ref: main
+        token: ${{ secrets.TKWW_GITHUB_TOKEN }}
+        path: .github/tkww-actions
+    - uses: ./.github/tkww-actions/packages/create-ios-framework-release
+      with:
+        carthage-path: 'scripts/carthage.sh'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

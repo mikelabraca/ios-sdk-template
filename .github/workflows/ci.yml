@@ -1,0 +1,34 @@
+name: CI
+
+on: push
+
+jobs:
+  test:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build
+        id: build
+        run: |
+          brew install xcodegen
+          xcodegen
+          scripts/carthage.sh build --no-skip-current
+
+  merge_release:
+    if: startsWith(github.ref, 'refs/heads/release/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: develop
+      - name: Checkout tkww actions
+        uses: actions/checkout@v2
+        with:
+          repository: tkww/actions
+          ref: main
+          token: ${{ secrets.TKWW_GITHUB_TOKEN }}
+          path: .github/tkww-actions
+      - uses: ./.github/tkww-actions/packages/merge-branch
+        with:
+          branch: develop
